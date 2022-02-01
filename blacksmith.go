@@ -3,15 +3,19 @@ package blacksmith
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
 
 const version = "1.0.0"
 
-//type Blacksmith is a struct to define  basics parameters of Blacksmith module
+//type Blacksmith is a struct to define parameters of Blacksmith module accesible from
+//the webApp created
 type Blacksmith struct {
 	AppName  string
 	Debug    bool
@@ -19,6 +23,7 @@ type Blacksmith struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 	RootPath string
+	Routes   *chi.Mux
 	config   config
 }
 
@@ -55,11 +60,15 @@ func (bls *Blacksmith) New(rootPath string) error {
 	infoLog, errorLog := bls.startLoggers()
 	bls.InfoLog = infoLog
 	bls.ErrorLog = errorLog
+
 	//Getenv return the value of DEBUG has string must be converted to a bool
 	bls.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
 	bls.Version = version
 	bls.RootPath = rootPath
-	//private settings for the blacksmith module
+	//bls.router returns a http.handler type, so we cast it to chi.mux type
+	bls.Routes = bls.routes().(*chi.Mux)
+
+	//private settings for the blacksmith module, form the .env file
 	bls.config = config{
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
@@ -81,6 +90,25 @@ func (bls *Blacksmith) Init(p initPaths) error {
 
 	}
 	return nil
+}
+
+//ListenAndServe start the webserver for the webapp
+func (bls *Blacksmith) ListenAndServe() {
+	server := &http.Server{
+		Addr:         fmt.Sprintf(":%s", bls.config.port),
+		ErrorLog:     bls.ErrorLog,
+		Handler:      bls.routes(),
+		IdleTimeout:  30 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 600 * time.Second,
+	}
+
+	bls.InfoLog.Printf("==> Listening on port %s", bls.config.port)
+	err := server.ListenAndServe()
+	if err != nil {
+		bls.ErrorLog.Fatal(err)
+	}
+
 }
 
 //checkDotenv verify if a .env files exists inside the wd of the webApp
