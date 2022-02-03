@@ -3,8 +3,11 @@ package render
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
+
+	"github.com/CloudyKit/jet/v6"
 )
 
 type Render struct {
@@ -13,6 +16,7 @@ type Render struct {
 	Secure     bool
 	Port       string
 	ServerName string
+	JetViews   *jet.Set //support for jet
 }
 
 type TemplateData struct {
@@ -32,16 +36,17 @@ func (rd *Render) Page(w http.ResponseWriter, r *http.Request, view string, vari
 	//use different types of renderers
 	switch strings.ToLower(rd.Renderer) {
 	case "go":
-		return rd.GoPage(w, r, view, variables, data)
+		return rd.GoPage(w, r, view, data)
 
 	case "jet":
+		return rd.JetPage(w, r, view, variables, data)
 	}
 	return nil
 
 }
 
 //GoPage
-func (rd *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, variables, data interface{}) error {
+func (rd *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, data interface{}) error {
 	//parse  html template file
 	tmpl, err := template.ParseFiles(fmt.Sprintf("%s/views/%s.page.tmpl", rd.RootPath, view))
 	if err != nil {
@@ -57,5 +62,43 @@ func (rd *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, va
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+//JetPage renders a template using the Jet templateing engine
+func (rd *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName string, variables, data interface{}) error {
+	//at first variables and data params must be process, because variables are the Jet parameters and data
+	//are the templateData content, JetPage() need both to be in the correct format to render the page
+
+	//empty jet.VarMap variable
+	var vars jet.VarMap
+	//check if variables param is not empty
+	if variables == nil {
+		//init the above empty jet.VarMap
+		vars = make(jet.VarMap)
+	} else {
+		//if variables have something, cast it to jet.VarMap Format to work with jet
+		vars = variables.(jet.VarMap)
+	}
+	// data param (templateData content) must be procesed to the correct fomat
+	td := &TemplateData{} //empty TemplateData struct
+	//if data param (the templateData content) is empty
+	if data != nil {
+		//cast data to TemplateData type, the Format to wor with it
+		td = data.(*TemplateData)
+	}
+	//get the template file by their name
+	template, err := rd.JetViews.GetTemplate(fmt.Sprintf("%s.jet", templateName))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	//render the template
+	err = template.Execute(w, vars, td)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	return nil
 }

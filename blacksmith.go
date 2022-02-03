@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CloudyKit/jet/v6"
 	"github.com/cristianortiz/blacksmith/render"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -16,7 +17,7 @@ import (
 const version = "1.0.0"
 
 //type Blacksmith is a struct to define parameters of Blacksmith module accesible later
-//when the webapp "myapp" calls blacksmith module
+//for the webapp "myapp"  blacksmith module
 type Blacksmith struct {
 	AppName  string
 	Debug    bool
@@ -26,6 +27,7 @@ type Blacksmith struct {
 	RootPath string
 	Routes   *chi.Mux //http.handler (chi mux), to config and init a webserver
 	Render   *render.Render
+	JetViews *jet.Set
 	config   config
 }
 
@@ -35,7 +37,7 @@ type config struct {
 	renderer string
 }
 
-//-New() receives the working directory in filesystem of the WebApp to be created
+//New() receives the working directory in filesystem of the WebApp to be created
 //defines the folder structure of webapp,check if .env file exists in wd,creates
 //and init webapp loggers, set the handler (*chi mux type) to config webserver to tun the webapp
 func (bls *Blacksmith) New(rootPath string) error {
@@ -75,8 +77,16 @@ func (bls *Blacksmith) New(rootPath string) error {
 		renderer: os.Getenv("RENDERER"),
 	}
 
-	// also this more simple way bls.createRenderer() using the alternative version in line 147
-	bls.Render = bls.createRenderer(bls)
+	//config Jet to initialize the blacksmith.JetViews field
+	var views = jet.NewSet(
+		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		jet.InDevelopmentMode(),
+	)
+	bls.JetViews = views
+
+	// set the renderer for myapp
+	bls.createRenderer()
+	//if calling he OLD-VERSION //bls.Render = bls.createRenderer(bls)
 	return nil
 }
 
@@ -95,13 +105,14 @@ func (bls *Blacksmith) Init(p initPaths) error {
 	return nil
 }
 
-//ListenAndServe config and start the webserver using Blacksmith.Routes as handler
-// (a *chi mux type in this case )for running the webapp
+//ListenAndServe config and start the webserver using myApp *Application.Routes
+//(not the blacksmith.routes default handler) as handler (*chi mux) to define
+// their own routes in myapp/routes, myApp is overwritten the blacksmith default handler
 func (bls *Blacksmith) ListenAndServe() {
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", bls.config.port),
 		ErrorLog:     bls.ErrorLog,
-		Handler:      bls.routes(),
+		Handler:      bls.Routes,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
@@ -134,22 +145,24 @@ func (bls *Blacksmith) startLoggers() (*log.Logger, *log.Logger) {
 	return infoLog, errorLog
 }
 
-//createRenderer config anc creates a Render struct to atach to blacksmith struct
-func (bls *Blacksmith) createRenderer(b *Blacksmith) *render.Render {
+//OLD-VERSION:createRenderer config anc creates a Render struct to atach to blacksmith struct
+// func (bls *Blacksmith) createRenderer(b *Blacksmith) {
+// 	myRenderer := render.Render{
+// 		Renderer: b.config.renderer,
+// 		RootPath: b.RootPath,
+// 		Port:     b.config.port,
+// 	}
+// 	return &myRenderer
+// }
+
+//this is an alternative way to above function, using only the receivers params to create
+//the attach the render struct into blacksmith struct, must much cleaner
+func (b *Blacksmith) createRenderer() {
 	myRenderer := render.Render{
 		Renderer: b.config.renderer,
 		RootPath: b.RootPath,
 		Port:     b.config.port,
+		JetViews: b.JetViews,
 	}
-	return &myRenderer
+	b.Render = &myRenderer
 }
-
-//this is an alternative way to above function, using only the receivers params to create
-//the attach the render struct into blacksmith struct
-// func (b *blacksmith) createRenderer() {
-// 	b.Render = &render.Render{
-// 		   Renderer: b.config.renderer,
-// 		   RootPath: b.RootPath,
-// 		   Port: b.config.port,
-// 	}
-// }
