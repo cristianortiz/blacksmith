@@ -55,7 +55,7 @@ func (bls *Blacksmith) New(rootPath string) error {
 	if err != nil {
 		return err
 	}
-	//read .env
+	//read .env files
 	err = godotenv.Load(rootPath + "/.env")
 	if err != nil {
 		return err
@@ -82,9 +82,10 @@ func (bls *Blacksmith) New(rootPath string) error {
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
 		jet.InDevelopmentMode(),
 	)
+	//set the initialized Jet type to blacksmith.JetViews field
 	bls.JetViews = views
 
-	// set the renderer for myapp
+	// set the renderer for myapp (can be Jet or Go templates depends on .env config)
 	bls.createRenderer()
 	//if calling he OLD-VERSION //bls.Render = bls.createRenderer(bls)
 	return nil
@@ -155,8 +156,8 @@ func (bls *Blacksmith) startLoggers() (*log.Logger, *log.Logger) {
 // 	return &myRenderer
 // }
 
-//this is an alternative way to above function, using only the receivers params to create
-//the attach the render struct into blacksmith struct, must much cleaner
+//this is an alternative way to above function, using only the receivers params to create Renderer type
+//and attach the renderer type into blacksmith type, must much cleaner
 func (b *Blacksmith) createRenderer() {
 	myRenderer := render.Render{
 		Renderer: b.config.renderer,

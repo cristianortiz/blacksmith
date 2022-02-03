@@ -31,7 +31,9 @@ type TemplateData struct {
 	Secure          bool
 }
 
-//to render a page switching between supported templates engines, variables and data are interfaces because can be anything
+//Render show a page switching between supported templates engines,view is the name of the view,
+// variables are config option for JetViews and data are the dynamic content to render.
+// both are interfaces because can be anything
 func (rd *Render) Page(w http.ResponseWriter, r *http.Request, view string, variables, data interface{}) error {
 	//use different types of renderers
 	switch strings.ToLower(rd.Renderer) {
@@ -45,7 +47,7 @@ func (rd *Render) Page(w http.ResponseWriter, r *http.Request, view string, vari
 
 }
 
-//GoPage
+//GoPage render a view using Go Templates
 func (rd *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, data interface{}) error {
 	//parse  html template file
 	tmpl, err := template.ParseFiles(fmt.Sprintf("%s/views/%s.page.tmpl", rd.RootPath, view))
@@ -65,10 +67,10 @@ func (rd *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, da
 	return nil
 }
 
-//JetPage renders a template using the Jet templateing engine
+//JetPage renders a template using the Jet templating engine
 func (rd *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName string, variables, data interface{}) error {
 	//at first variables and data params must be process, because variables are the Jet parameters and data
-	//are the templateData content, JetPage() need both to be in the correct format to render the page
+	//are the templateData content, JetPage() need both  in the correct format to render the view
 
 	//empty jet.VarMap variable
 	var vars jet.VarMap
