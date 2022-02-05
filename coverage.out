@@ -1,0 +1,22 @@
+mode: set
+github.com/cristianortiz/blacksmith/render/render.go:38.112,40.38 1 1
+github.com/cristianortiz/blacksmith/render/render.go:47.2,47.52 1 1
+github.com/cristianortiz/blacksmith/render/render.go:41.12,42.37 1 1
+github.com/cristianortiz/blacksmith/render/render.go:44.13,45.49 1 1
+github.com/cristianortiz/blacksmith/render/render.go:52.103,55.16 2 1
+github.com/cristianortiz/blacksmith/render/render.go:59.2,61.17 2 1
+github.com/cristianortiz/blacksmith/render/render.go:64.2,65.16 2 1
+github.com/cristianortiz/blacksmith/render/render.go:68.2,68.12 1 1
+github.com/cristianortiz/blacksmith/render/render.go:55.16,57.3 1 1
+github.com/cristianortiz/blacksmith/render/render.go:61.17,63.3 1 0
+github.com/cristianortiz/blacksmith/render/render.go:65.16,67.3 1 0
+github.com/cristianortiz/blacksmith/render/render.go:72.123,79.22 2 1
+github.com/cristianortiz/blacksmith/render/render.go:87.2,89.17 2 1
+github.com/cristianortiz/blacksmith/render/render.go:94.2,95.16 2 1
+github.com/cristianortiz/blacksmith/render/render.go:100.2,101.16 2 1
+github.com/cristianortiz/blacksmith/render/render.go:106.2,106.12 1 1
+github.com/cristianortiz/blacksmith/render/render.go:79.22,82.3 1 1
+github.com/cristianortiz/blacksmith/render/render.go:82.8,85.3 1 0
+github.com/cristianortiz/blacksmith/render/render.go:89.17,92.3 1 0
+github.com/cristianortiz/blacksmith/render/render.go:95.16,98.3 2 1
+github.com/cristianortiz/blacksmith/render/render.go:101.16,104.3 2 0

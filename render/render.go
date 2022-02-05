@@ -1,6 +1,7 @@
 package render
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -31,8 +32,8 @@ type TemplateData struct {
 	Secure          bool
 }
 
-//Render show a page switching between supported templates engines,view is the name of the view,
-// variables are config option for JetViews and data are the dynamic content to render.
+//Render show a page switching between supported templates engines,view is the name of the file to be
+//rendered, variables are config option for JetViews and data are the dynamic content to render.
 // both are interfaces because can be anything
 func (rd *Render) Page(w http.ResponseWriter, r *http.Request, view string, variables, data interface{}) error {
 	//use different types of renderers
@@ -43,7 +44,7 @@ func (rd *Render) Page(w http.ResponseWriter, r *http.Request, view string, vari
 	case "jet":
 		return rd.JetPage(w, r, view, variables, data)
 	}
-	return nil
+	return errors.New("no rendering engine specified")
 
 }
 
