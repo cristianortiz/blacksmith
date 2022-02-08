@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/CloudyKit/jet/v6"
+	"github.com/alexedwards/scs/v2"
 	"github.com/cristianortiz/blacksmith/render"
+	"github.com/cristianortiz/blacksmith/session"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -27,14 +29,17 @@ type Blacksmith struct {
 	RootPath string
 	Routes   *chi.Mux //http.handler (chi mux), to config and init a webserver
 	Render   *render.Render
+	Session  *scs.SessionManager
 	JetViews *jet.Set
 	config   config
 }
 
 //private configurations settings for blackmist module
 type config struct {
-	port     string
-	renderer string
+	port        string
+	renderer    string
+	cookie      cookieConfig
+	sessionType string
 }
 
 //New() receives the working directory in filesystem of the WebApp to be created
@@ -75,7 +80,27 @@ func (bls *Blacksmith) New(rootPath string) error {
 	bls.config = config{
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
+		//cookies config from .env to manage session
+		cookie: cookieConfig{
+			name:     os.Getenv("COOKIE_NAME"),
+			lifetime: os.Getenv("COOKIE_LIFETIME"),
+			persist:  os.Getenv("COOKIE_PERSISTS"),
+			secure:   os.Getenv("COOKIE_SECURE"),
+			domain:   os.Getenv("COOKIE_DOMAIN"),
+		},
+		sessionType: os.Getenv("SESSION_TYPE"),
 	}
+
+	//set Session struct type with the paramaters configured in bls.config.cookie
+	sess := session.Session{
+		CookieLifetime: bls.config.cookie.lifetime,
+		CookiePersist:  bls.config.cookie.persist,
+		CookieName:     bls.config.cookie.name,
+		CookieDomain:   bls.config.cookie.domain,
+		SessionType:    bls.config.sessionType,
+	}
+	//create  SessionManager package type configure with the Session type values
+	bls.Session = sess.InitSession()
 
 	//config Jet to initialize the blacksmith.JetViews field
 	var views = jet.NewSet(

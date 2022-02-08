@@ -12,17 +12,18 @@ var pageData = []struct {
 	template      string //file template using in the test, can be a non-existing one
 	errorExpected bool   //if an error must be returned as to PASS the test
 	errorMessage  string //error msg if an error was expected to PASS the test
-}{ //Test on rendering go templates
+}{
+	//Test on rendering go templates
 	{"go_page", "go", "hometest", false, "error rendering go template"},
 	{"go_page_no_template", "go", "no-file", true, "error must be occurs when rendering a non-existent go template"},
 	//Test on rendering jet templates
 	{"jet_page", "jet", "homejet", false, "error rendering jet template"},
 	{"jet_page_no_template", "jet", "no-file", true, "error must be occurs when rendering a non-existent jet template"},
-	//Test on trying a non valid render option (jet or go)
+	//Test on trying a non valid render option
 	{"invalid_render_engine", "foo", "hometest", true, "error must be occurs with non engine template configured"},
 }
 
-//TestRender_Page test render.Page() using to test tables
+//TestRender_Page test render.Page() using  testing tables
 func TestRender_Page(t *testing.T) {
 	//run all the tests with the parameteres defined in PageData[]
 	for _, e := range pageData {
@@ -63,7 +64,6 @@ func TestRender_Page(t *testing.T) {
 	// err = testRenderer.Page(w, r, "homejet", nil, nil)
 	// if err != nil {
 	// 	t.Error("error rendering page", err)
-
 	// }
 	// //Test non existing go template file
 	// testRenderer.Renderer = "go"
@@ -71,7 +71,6 @@ func TestRender_Page(t *testing.T) {
 	// //the error must exists
 	// if err == nil {
 	// 	t.Error("error rendering non-existent go template", err)
-
 	// }
 	// //Test non existing jet file
 	// testRenderer.Renderer = "jet"
@@ -79,16 +78,13 @@ func TestRender_Page(t *testing.T) {
 	// //the error must exists
 	// if err == nil {
 	// 	t.Error("error rendering not existent jet template ", err)
-
 	// }
-
 	// //Test non configured rendering engine
 	// testRenderer.Renderer = ""
 	// err = testRenderer.Page(w, r, "hometest", nil, nil)
 	// //the error must exists
 	// if err == nil {
 	// 	t.Error("No error returned while renderer is not configured", err)
-
 	// }
 }
 
