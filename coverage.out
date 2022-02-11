@@ -1,4 +1,16 @@
 mode: set
+github.com/cristianortiz/blacksmith/session/session.go:23.53,28.16 3 1
+github.com/cristianortiz/blacksmith/session/session.go:32.2,32.48 1 1
+github.com/cristianortiz/blacksmith/session/session.go:36.2,36.47 1 1
+github.com/cristianortiz/blacksmith/session/session.go:40.2,49.40 8 1
+github.com/cristianortiz/blacksmith/session/session.go:58.2,58.16 1 1
+github.com/cristianortiz/blacksmith/session/session.go:28.16,30.3 1 0
+github.com/cristianortiz/blacksmith/session/session.go:32.48,34.3 1 1
+github.com/cristianortiz/blacksmith/session/session.go:36.47,38.3 1 0
+github.com/cristianortiz/blacksmith/session/session.go:51.15,51.15 0 0
+github.com/cristianortiz/blacksmith/session/session.go:52.26,52.26 0 0
+github.com/cristianortiz/blacksmith/session/session.go:53.32,53.32 0 0
+github.com/cristianortiz/blacksmith/session/session.go:54.10,54.10 0 1
 github.com/cristianortiz/blacksmith/render/render.go:38.112,40.38 1 1
 github.com/cristianortiz/blacksmith/render/render.go:47.2,47.52 1 1
 github.com/cristianortiz/blacksmith/render/render.go:41.12,42.37 1 1
