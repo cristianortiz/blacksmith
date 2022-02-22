@@ -69,6 +69,8 @@ func (bls *Blacksmith) New(rootPath string) error {
 	}
 	//create loggers and atacched to blacksmith type struct
 	infoLog, errorLog := bls.startLoggers()
+	bls.InfoLog = infoLog
+	bls.ErrorLog = errorLog
 
 	//connects to database and
 	if os.Getenv("DATABASE_TYPE") != "" {
@@ -78,15 +80,16 @@ func (bls *Blacksmith) New(rootPath string) error {
 			errorLog.Println(err)
 			os.Exit(1)
 		}
+
 		//databse Type and connections pool for myApp instance
 		bls.DB = Database{
 			DataType: os.Getenv("DATABASE_TYPE"),
 			Pool:     db,
 		}
+		//log the DB connection
+		bls.InfoLog.Printf("==> %s database connected", bls.DB.DataType)
 	}
 
-	bls.InfoLog = infoLog
-	bls.ErrorLog = errorLog
 	//Getenv return the value of DEBUG as string, must be converted to a bool
 	bls.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
 	bls.Version = version
