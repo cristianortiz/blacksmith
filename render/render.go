@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/CloudyKit/jet/v6"
+	"github.com/alexedwards/scs/v2"
 )
 
 type Render struct {
@@ -18,6 +19,7 @@ type Render struct {
 	Port       string
 	ServerName string
 	JetViews   *jet.Set //support for jet
+	Session    *scs.SessionManager
 }
 
 type TemplateData struct {
@@ -30,6 +32,19 @@ type TemplateData struct {
 	Port            string
 	ServerName      string
 	Secure          bool
+}
+
+//defaultData set the init values if for a template view to be rendered
+//data is extracted for the Render type receiver
+func (rd *Render) defaultData(td *TemplateData, r *http.Request) *TemplateData {
+	td.Secure = rd.Secure
+	td.ServerName = rd.ServerName
+	td.Port = rd.Port
+	//check if user session variable  exists to authenticate a user
+	if rd.Session.Exists(r.Context(), "userID") {
+		td.IsAuthenticated = true
+	}
+	return td
 }
 
 //Render show a page switching between supported templates engines,view is the name of the file to be
@@ -90,6 +105,8 @@ func (rd *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName s
 		//cast data to TemplateData type, the Format to wor with it
 		td = data.(*TemplateData)
 	}
+
+	td = rd.defaultData(td, r)
 	//get the template file by their name
 	template, err := rd.JetViews.GetTemplate(fmt.Sprintf("%s.jet", templateName))
 	if err != nil {

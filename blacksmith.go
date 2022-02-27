@@ -218,6 +218,7 @@ func (b *Blacksmith) createRenderer() {
 		RootPath: b.RootPath,
 		Port:     b.config.port,
 		JetViews: b.JetViews,
+		Session:  b.Session,
 	}
 	b.Render = &myRenderer
 }
