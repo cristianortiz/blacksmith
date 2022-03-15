@@ -19,11 +19,22 @@ func main() {
 	if err != nil {
 		exitGracefully(err)
 	}
+	//setup blacksmith type
+	setup()
+
 	switch arg1 {
 	case "help":
 		showHelp()
 	case "version":
 		color.Yellow("App version: " + version)
+	case "make":
+		if arg2 == "" {
+			exitGracefully(errors.New("'make' requieres subcommand: (migration|model|handler)"))
+		}
+		err = doMake(arg2, arg3)
+		if err != nil {
+			exitGracefully(err)
+		}
 	default:
 		log.Print(arg2, arg3)
 
@@ -62,6 +73,7 @@ func showHelp() {
 	`)
 }
 
+//exitGracefully ends the CLI app showing the appropiate messages to user
 func exitGracefully(err error, msg ...string) {
 	message := ""
 	if len(msg) > 0 {
