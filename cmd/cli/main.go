@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"os"
 
 	"github.com/cristianortiz/blacksmith"
@@ -16,6 +15,7 @@ var bls blacksmith.Blacksmith
 func main() {
 	//create command line arguments
 	arg1, arg2, arg3, err := validateInput()
+	var message string
 	if err != nil {
 		exitGracefully(err)
 	}
@@ -27,6 +27,17 @@ func main() {
 		showHelp()
 	case "version":
 		color.Yellow("App version: " + version)
+		//Ex command:blacksmith migrate up
+	case "migrate":
+		//set 'up' as default migrate command option
+		if arg2 == "" {
+			arg2 = "up"
+		}
+		err = doMigrate(arg2, arg3)
+		if err != nil {
+			exitGracefully(err)
+		}
+		message = "Migrations complete!"
 	case "make":
 		if arg2 == "" {
 			exitGracefully(errors.New("'make' requieres subcommand: (migration|model|handler)"))
@@ -36,9 +47,11 @@ func main() {
 			exitGracefully(err)
 		}
 	default:
-		log.Print(arg2, arg3)
+		showHelp()
 
 	}
+
+	exitGracefully(nil, message)
 }
 
 //validateInput() checks if commands are entered in prompt line after the command line argumnt
@@ -73,7 +86,7 @@ func showHelp() {
 	`)
 }
 
-//exitGracefully ends the CLI app showing the appropiate messages to user
+//exitGracefully() ends the CLI app showing the appropiate messages to user
 func exitGracefully(err error, msg ...string) {
 	message := ""
 	if len(msg) > 0 {

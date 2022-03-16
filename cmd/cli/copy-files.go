@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"io/ioutil"
+	"os"
 )
 
 //go:embed templates
@@ -11,15 +12,20 @@ var templateFS embed.FS
 //copyFilefromTemplate() extract the content of a file
 func copyFilefromTemplate(templatePath, targetFile string) error {
 	//TODO : check to ensure files does not already exist
+	var _, err = os.Stat(templatePath)
+	//if an error is returned means the already exists
+	if os.IsNotExist(err) {
 
-	data, err := templateFS.ReadFile(templatePath)
-	if err != nil {
-		exitGracefully(err)
-	}
-	//copy the data to a file
-	err = copyDataToFile(data, targetFile)
-	if err != nil {
-		exitGracefully(err)
+		data, err := templateFS.ReadFile(templatePath)
+		if err != nil {
+			exitGracefully(err)
+		}
+		//copy the data to a file
+		err = copyDataToFile(data, targetFile)
+		if err != nil {
+			exitGracefully(err)
+		}
+
 	}
 
 	return nil

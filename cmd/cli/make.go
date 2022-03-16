@@ -8,6 +8,7 @@ import (
 
 //doMake() triggers the action of "make" command and their subcommand in CLI
 func doMake(arg2, arg3 string) error {
+	//arg2 is subcommand arg3 is subcommand option
 
 	switch arg2 {
 	//make subcommand
