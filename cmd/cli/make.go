@@ -6,17 +6,18 @@ import (
 	"time"
 )
 
-//doMake() triggers the action of "make" command and their subcommand in CLI
+//doMake() triggers the action of "make" command and their sub-cmd in CLI
 func doMake(arg2, arg3 string) error {
-	//arg2 is subcommand arg3 is subcommand option
+	//arg2 is sub-cmd arg3 is sub-cmd option
 
 	switch arg2 {
 	//make subcommand
 	case "migration":
-		//posgtres is defaultt dbtype in blacksmith
+		//posgtres is default dbtype in blacksmith
 		dbType := bls.DB.DataType
+		//sub-cmd option is empty
 		if arg3 == "" {
-			exitGracefully(errors.New("yo must give the migration a name"))
+			exitGracefully(errors.New("you must give the migration a name"))
 		}
 		fileName := fmt.Sprintf("%d_%s", time.Now().UnixMicro(), arg3)
 		upFile := bls.RootPath + "/migrations/" + fileName + "." + dbType + ".up.sql"
@@ -28,6 +29,12 @@ func doMake(arg2, arg3 string) error {
 			exitGracefully(err)
 		}
 		err = copyFilefromTemplate("templates/migrations/migration."+dbType+".down.sql", downFile)
+		if err != nil {
+			exitGracefully(err)
+		}
+
+	case "auth":
+		err := doAuth()
 		if err != nil {
 			exitGracefully(err)
 		}

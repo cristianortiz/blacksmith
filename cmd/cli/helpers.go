@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 )
 
@@ -27,11 +28,11 @@ func setup() {
 //on wich dbType migrations are running
 func getDSN() string {
 	dbType := bls.DB.DataType
-	//if DB is pgx set postgres
+	//if DB is defined as pgx set postgres
 	if dbType == "pgx" {
 		dbType = "postgres"
 	}
-	//config dsn for posgress
+	//config dsn for postgres
 	if dbType == "postgres" {
 		var dsn string
 		if os.Getenv("DATABASE_PASS") != "" {
@@ -56,4 +57,18 @@ func getDSN() string {
 	//config dsn for mysql
 	return "mysql://" + bls.BuildDSN()
 
+}
+
+//showHelp() print a text with help info about the cli commands and their functions
+func showHelp() {
+	color.Yellow(`Available commands:
+
+	help        			 - show the help commands
+	version     		 	 - print app version
+	migrate     		 	 - runs all up migrations that have not been run previously
+	migrate down 		 	 - reverses the most recent migration
+	migration reset		 	 - runs all down migrations in reverse order, and then all up migrations
+	make migrations <name>   - creates two new up and down migrations in the migrations folder
+	
+	`)
 }

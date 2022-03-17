@@ -1,5 +1,6 @@
 package main
 
+//doMigrate run the migrate cmd with their sub-cmd and options
 func doMigrate(arg2, arg3 string) error {
 	dsn := getDSN()
 
@@ -10,6 +11,7 @@ func doMigrate(arg2, arg3 string) error {
 		if err != nil {
 			return err
 		}
+	//'down'sub-cmd has two options
 	case "down":
 		//migrate down --option 'all' get down all the previous migrations
 		if arg3 == "all" {
@@ -24,7 +26,7 @@ func doMigrate(arg2, arg3 string) error {
 				return err
 			}
 		}
-		//reset the entire database running down all migrations an then running up
+		//reset sub-cmd the entire database running down all migrations an then running up
 	case "reset":
 		//migrate down all the previous migrations
 		err := bls.MigrateDownAll(dsn)
@@ -36,7 +38,7 @@ func doMigrate(arg2, arg3 string) error {
 		if err != nil {
 			return err
 		}
-	//for the last case if something vet wrong
+	// the last case if something get wrong
 	default:
 		showHelp()
 	}

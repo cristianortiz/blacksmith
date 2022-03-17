@@ -9,7 +9,8 @@ import (
 //go:embed templates
 var templateFS embed.FS
 
-//copyFilefromTemplate() extract the content of a file
+//copyFilefromTemplate() extract the content from a template file and
+//insert it into another file
 func copyFilefromTemplate(templatePath, targetFile string) error {
 	//TODO : check to ensure files does not already exist
 	var _, err = os.Stat(templatePath)
@@ -20,7 +21,7 @@ func copyFilefromTemplate(templatePath, targetFile string) error {
 		if err != nil {
 			exitGracefully(err)
 		}
-		//copy the data to a file
+		//copy the data into a new a file
 		err = copyDataToFile(data, targetFile)
 		if err != nil {
 			exitGracefully(err)

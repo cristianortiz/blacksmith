@@ -13,13 +13,13 @@ const version = "1.0.0"
 var bls blacksmith.Blacksmith
 
 func main() {
+	var message string
 	//create command line arguments
 	arg1, arg2, arg3, err := validateInput()
-	var message string
 	if err != nil {
 		exitGracefully(err)
 	}
-	//setup blacksmith type
+	//setup blacksmith types for running migrations
 	setup()
 
 	switch arg1 {
@@ -27,9 +27,10 @@ func main() {
 		showHelp()
 	case "version":
 		color.Yellow("App version: " + version)
+
 		//Ex command:blacksmith migrate up
 	case "migrate":
-		//set 'up' as default migrate command option
+		//set 'up' as default migrate sub-cmd
 		if arg2 == "" {
 			arg2 = "up"
 		}
@@ -54,7 +55,8 @@ func main() {
 	exitGracefully(nil, message)
 }
 
-//validateInput() checks if commands are entered in prompt line after the command line argumnt
+//validateInput() checks if commands are entered in prompt line after
+//the CLI command argument (blacksmith cmd sub-cmd sub-cmd-Option)
 func validateInput() (string, string, string, error) {
 	var arg1, arg2, arg3 string
 	//check if command line arguments are being entered in prompt
@@ -75,15 +77,6 @@ func validateInput() (string, string, string, error) {
 	}
 
 	return arg1, arg2, arg3, nil
-}
-
-//showHelp() print a text with help info about the cli commands an dtheir functions
-func showHelp() {
-	color.Yellow(`Available commands:
-	help         - show the help commands
-	version      - print app version
-	
-	`)
 }
 
 //exitGracefully() ends the CLI app showing the appropiate messages to user
