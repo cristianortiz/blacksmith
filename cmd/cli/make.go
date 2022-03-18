@@ -32,7 +32,7 @@ func doMake(arg2, arg3 string) error {
 		if err != nil {
 			exitGracefully(err)
 		}
-
+		//make auth sub-cmd is
 	case "auth":
 		err := doAuth()
 		if err != nil {

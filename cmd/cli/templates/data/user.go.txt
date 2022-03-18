@@ -1,0 +1,188 @@
+
+package data
+
+import (
+	"errors"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
+
+	up "github.com/upper/db/v4"
+)
+
+//User type maps the users table in DB
+type User struct {
+	ID        int       `db:"id,omitempty"`
+	FirstName string    `db:"first_name"`
+	LastName  string    `db:"last_name"`
+	Email     string    `db:"email"`
+	Active    int       `db:"user_active"`
+	Password  string    `db:"password"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	Token     Token     `db:"-"`
+}
+
+//Table func overrides the 'users' DB table name to refers it with any other name,
+// like 'customers' or something like that if it the case
+func (u *User) Table() string {
+	return "users"
+}
+
+//GetAll query the DB for the entire list of users, use the Table() func to
+//referes with any name to user table, returns a slice of Users type and an error
+func (u *User) GetAll() ([]*User, error) {
+	//Table() refers with any name to users table, upper treats DB tables as collections
+	collection := upper.Collection(u.Table())
+	//the User type that will be returned as response
+	var all []*User
+	//query the list of users to DB applyng a search condition
+	res := collection.Find().OrderBy("last_name")
+	//mapping the query result-set to the User slice as reference
+	err := res.All(&all)
+	if err != nil {
+		return nil, err
+	}
+
+	return all, nil
+
+}
+
+//GetByEmail query the DB for the data of an specific user filtering by their email and
+//adds the most recent token generated for that particular user
+func (u *User) GetByEmail(email string) (*User, error) {
+
+	var theUser User
+	collection := upper.Collection(u.Table())
+	//query the DB for a user using their email as condition through var up (Upper type)
+	res := collection.Find(up.Cond{"email =": email})
+	//get one row result based on the user email
+	err := res.One(&theUser)
+	if err != nil {
+		return nil, err
+	}
+
+	var token Token
+	collection = upper.Collection(token.Table())
+	//get the most recent token for a register and authenticated user in DB
+	res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry >": time.Now()}).OrderBy("created_at desc")
+	err = res.One(&token)
+	if err != nil {
+		//use the most detailed errors check from upper package
+		if err != up.ErrNilRecord && err != up.ErrNoMoreRows {
+			return nil, err
+		}
+	}
+	// add the token to the user info to be returned
+	theUser.Token = token
+
+	return &theUser, nil
+}
+
+//GetByID return the user data from DB and their token based on their ID
+func (u *User) GetByID(id int) (*User, error) {
+	var theUser User
+	collection := upper.Collection(u.Table())
+	res := collection.Find(up.Cond{"id =": id})
+
+	err := res.One(&theUser)
+	if err != nil {
+		return nil, err
+	}
+	//get the user token and addit to the response data
+	var token Token
+	collection = upper.Collection(token.Table())
+	//get the most recent token for a register and authenticated user in DB
+	res = collection.Find(up.Cond{"user_id =": theUser.ID, "expiry >": time.Now()}).OrderBy("created_at desc")
+	err = res.One(&token)
+	if err != nil {
+		//use the most detailed errors check from upper package
+		if err != up.ErrNilRecord && err != up.ErrNoMoreRows {
+			return nil, err
+		}
+	}
+	// add the token to the user info to be returned
+	theUser.Token = token
+	return &theUser, nil
+}
+
+// UpdateUser updates the data of a specific user in DB
+func (u *User) UpdateUser(theUser User) error {
+	//set the time of the actual update action on users data
+	theUser.UpdatedAt = time.Now()
+	collection := upper.Collection(u.Table())
+	res := collection.Find(theUser.ID)
+	err := res.Update(&theUser)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+// DeleteUser delete all the info of the user from DB based on their id
+func (u *User) DeleteUser(id int) error {
+	collection := upper.Collection(u.Table())
+	res := collection.Find(up.Cond{"id =": id})
+	err := res.Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// InsertUser updates the data of a specific user in DB, returns the id of the new user
+func (u *User) InsertUser(theUser User) (int, error) {
+	//create the hash to encrypt the password
+	newHash, _ := bcrypt.GenerateFromPassword([]byte(theUser.Password), 8)
+
+	//set the time of the actual create action on users data
+	theUser.CreatedAt = time.Now()
+	theUser.UpdatedAt = time.Now()
+	theUser.Password = string(newHash)
+
+	collection := upper.Collection(u.Table())
+	res, err := collection.Insert(theUser)
+
+	if err != nil {
+		return 0, err
+	}
+	id := getInsertedID(res.ID())
+	return id, nil
+}
+
+func (u *User) ResetPassword(id int, password string) error {
+	//create the encrypted password
+	newHash, _ := bcrypt.GenerateFromPassword([]byte(password), 8)
+	// get the user info based on their id
+	theUser, err := u.GetByID(id)
+	if err != nil {
+		return err
+	}
+	//assign the encrypted password
+	u.Password = string(newHash)
+
+	err = theUser.UpdateUser(*u)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *User) PasswordMatches(plainText string) (bool, error) {
+	//bcrypt only works with slice of bytes data,hash the password received as parameter
+	//and the pass returned by the DB to compare both
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plainText))
+	if err != nil {
+		switch {
+		// use a specific error from the bcrypt package
+		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+			return false, nil
+		default:
+			//if the error is not came from bcrypt
+			return false, err
+		}
+	}
+	return true, nil
+}
