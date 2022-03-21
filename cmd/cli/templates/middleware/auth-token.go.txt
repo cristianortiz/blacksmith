@@ -1,0 +1,25 @@
+package middleware
+
+import (
+	"net/http"
+)
+
+// Authtoken() middleware call data/token functions to authenticate a token sended through
+//http request
+func (m *Middleware) AuthToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := m.Models.Tokens.AuthenticateToken(r)
+		//response a struct in case of error
+		if err != nil {
+			var payload struct {
+				Error   bool   `json:"error"`
+				Message string `json:"message"`
+			}
+			payload.Error = true
+			payload.Message = "invalid authentication credentials"
+			//serialize as JSON the error struct response
+			_ = m.App.WriteJSON(w, http.StatusUnauthorized, payload)
+		}
+	})
+
+}

@@ -1,0 +1,15 @@
+package middleware
+
+import "net/http"
+
+//Auth() middleware checks if the userID session variable exists in session context
+//has a middleware returns a handlerFunc
+func (m *Middleware) Auth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//if no userID session exists
+		if !m.App.Session.Exists(r.Context(), "userID") {
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		}
+	})
+
+}

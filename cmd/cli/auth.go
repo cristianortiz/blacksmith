@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 //doAuth executes the auth cmd, runs the migrations to create the necessary
@@ -43,5 +45,25 @@ func doAuth() error {
 	if err != nil {
 		exitGracefully(err)
 	}
+
+	//copy over middleware see middleware template files for details
+	err = copyFilefromTemplate("templates/middleware/auth.go.txt", bls.RootPath+"/middleware/auth.go")
+	if err != nil {
+		exitGracefully(err)
+	}
+
+	err = copyFilefromTemplate("templates/middleware/auth-token.go.txt", bls.RootPath+"/middleware/auth-token.go")
+	if err != nil {
+		exitGracefully(err)
+	}
+
+	//message for myapp developer
+	color.Yellow("- users, tokens and remembers_tokens migrations created en executed in DB")
+	color.Yellow("- user and tokens models created in myapp/data")
+	color.Yellow("- auth and auth-token middleware created at myapp/middleware")
+	color.Yellow("")
+	color.Yellow("Don't forget to add 'user' and 'token' models in data/models")
+	color.Yellow("Also you need to add appropriate middleware to your routes")
+
 	return nil
 }
