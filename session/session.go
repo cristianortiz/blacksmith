@@ -1,14 +1,19 @@
 package session
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
 )
 
+// Session type for SessionManager package to handle session in myapp also allows to write
+// an read sessions from DB with sessions store por every single DB engine
 type Session struct {
 	CookieLifetime string
 	CookiePersist  string
@@ -16,6 +21,7 @@ type Session struct {
 	CookieDomain   string
 	CookieSecure   string
 	SessionType    string
+	DBPool         *sql.DB //to write to the session table and read from it
 }
 
 //InitSession set up sessionManager type form the .env file, as every value in it is a string
@@ -45,12 +51,16 @@ func (c *Session) InitSession() *scs.SessionManager {
 	session.Cookie.Domain = c.CookieDomain
 	session.Cookie.SameSite = http.SameSiteLaxMode
 
-	//wich session store
+	// config the DBPool for write and read session
+	// from DB postgres, mysql,redis etc using sessionManager session store
 	switch strings.ToLower(c.SessionType) {
 
 	case "redis":
 	case "mysql", "mariadb":
+		session.Store = mysqlstore.New(c.DBPool)
 	case "postgres", "postgresql":
+
+		session.Store = postgresstore.New(c.DBPool)
 	default:
 		//cookie
 

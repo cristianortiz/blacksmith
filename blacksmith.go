@@ -123,6 +123,7 @@ func (bls *Blacksmith) New(rootPath string) error {
 		CookieName:     bls.config.cookie.name,
 		CookieDomain:   bls.config.cookie.domain,
 		SessionType:    bls.config.sessionType,
+		DBPool:         bls.DB.Pool, //to write and read sessions from DB
 	}
 	//create  SessionManager package type configure with the Session type values
 	bls.Session = sess.InitSession()
