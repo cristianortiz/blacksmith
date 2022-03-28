@@ -26,4 +26,4 @@ jobs:
         uses: actions/setup-go@v2
 
       - name: Test
-        run: make coverage
+        run: go test -cover ./...
