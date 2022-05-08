@@ -10,13 +10,13 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-// Validation type to store form data and validations errors
+// Validation type to store form data and validation errors
 type Validation struct {
 	Data   url.Values
 	Errors map[string]string
 }
 
-// Validator() receiver func to initialize the custom validator type
+// Validator() receiver func to initialize the atributes of the custom validator type
 func (bls *Blacksmith) Validator(data url.Values) *Validation {
 	return &Validation{
 		Errors: make(map[string]string),
@@ -60,7 +60,7 @@ func (v *Validation) Required(r *http.Request, fields ...string) {
 }
 
 // Check() use a simple bool to add or not en error to Validation.Errors map
-// will be used t 	 	o
+// will be used to evalate a condition defined in the ok param
 func (v *Validation) Check(ok bool, key, message string) {
 	if !ok {
 		v.AddError(key, message)
